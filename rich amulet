@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rich Amulet - Gemini AI Pro Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Kanit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-light: #fcd34d;
+            --gold-primary: #fbbf24;
+            --gold-dark: #b45309;
+            --black-bg: #020617;
+            --black-card: #0f172a;
+        }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--black-bg);
+            color: #f1f5f9;
+            scroll-behavior: smooth;
+        }
+        .font-kanit { font-family: 'Kanit', sans-serif; }
+        .gold-text {
+            background: linear-gradient(to bottom, #fde68a 0%, #fbbf24 50%, #92400e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .premium-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid rgba(251, 191, 36, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .premium-card:hover {
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+            transform: scale(1.01);
+        }
+        .nav-glass {
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, #fcd34d, #d97706);
+            color: #000;
+            transition: all 0.3s;
+        }
+        .btn-gold:hover {
+            background: linear-gradient(135deg, #fff, #fbbf24);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+        }
+        /* AI Elements */
+        #chat-window {
+            display: none;
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 380px;
+            height: 550px;
+            background: #0f172a;
+            border: 1px solid #fbbf24;
+            border-radius: 16px;
+            z-index: 2000;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+        }
+        .chat-bubble-ai { background: #1e293b; border-radius: 12px 12px 12px 0; }
+        .chat-bubble-user { background: #fbbf24; color: #000; border-radius: 12px 12px 0 12px; align-self: flex-end; }
+        .loading-spinner {
+            border: 3px solid rgba(251, 191, 36, 0.1);
+            border-top: 3px solid #fbbf24;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav-glass sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10">
+                        <svg viewBox="0 0 100 100" class="w-full h-full">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#fbbf24" stroke-width="2" />
+                            <path d="M50 25 L50 75 M35 50 L65 50" stroke="#fbbf24" stroke-width="3" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="block text-xl font-kanit font-bold gold-text leading-none uppercase">Rich Amulet</span>
+                        <span class="text-[9px] tracking-[0.3em] text-amber-500 uppercase">AI Driven Excellence</span>
+                    </div>
+                </div>
+
+                <div class="hidden md:flex space-x-8 text-sm font-medium">
+                    <a href="#home" class="hover:text-amber-400">หน้าแรก</a>
+                    <a href="#ai-analyzer" class="hover:text-amber-400">✨ AI วิเคราะห์พระ</a>
+                    <a href="#catalog" class="hover:text-amber-400">ตู้พระออนไลน์</a>
+                    <a href="#contact" class="text-amber-400 font-bold">ติดต่อเรา</a>
+                </div>
+                
+                <button onclick="toggleChat()" class="btn-gold px-5 py-2 rounded-full font-kanit font-bold text-xs flex items-center">
+                    <span class="mr-2">✨</span> ถาม AI Expert
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section id="home" class="relative py-20 px-4 flex items-center justify-center text-center bg-[url('https://images.unsplash.com/photo-1615884494901-5120a84e6065?q=80&w=2000')] bg-cover bg-fixed">
+        <div class="absolute inset-0 bg-black/70"></div>
+        <div class="relative z-10 max-w-3xl">
+            <h1 class="text-4xl md:text-6xl font-kanit font-bold mb-6 text-white leading-tight">
+                รวมพุทธคุณระดับพรีเมียม <br>พร้อมพลัง <span class="gold-text">✨ Gemini AI</span>
+            </h1>
+            <p class="text-slate-300 text-lg mb-10">
+                ครั้งแรกของวงการพระเครื่องไทย ที่ผสานความเชื่อเข้ากับเทคโนโลยีอัจฉริยะ <br>เพื่อการวิเคราะห์และตรวจสอบที่แม่นยำกว่าที่เคย
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#ai-analyzer" class="btn-gold px-8 py-3 rounded-sm font-bold">✨ เริ่มวิเคราะห์พระด้วย AI</a>
+                <a href="#catalog" class="border border-white/20 px-8 py-3 rounded-sm font-bold hover:bg-white/10 transition">ชมพระในร้าน</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Vision Section -->
+    <section id="ai-analyzer" class="py-24 bg-slate-950">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="text-3xl font-kanit font-bold text-white mb-6 uppercase tracking-wider">
+                        ✨ AI Visual Recognition
+                    </h2>
+                    <p class="text-slate-400 mb-8 leading-relaxed">
+                        อัปโหลดรูปภาพพระเครื่องของท่านเพื่อให้ระบบ Gemini AI วิเคราะห์รายละเอียด ไม่ว่าจะเป็นชื่อรุ่น วัดที่สร้าง หรือลักษณะพุทธศิลป์ที่โดดเด่นในเบื้องต้น
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-center text-amber-500">
+                            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>วิเคราะห์พุทธลักษณะแม่นยำ</span>
+                        </div>
+                        <div class="flex items-center text-amber-500">
+                            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>ระบุรุ่นและประวัติความเป็นมา</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-card p-8 rounded-2xl">
+                    <div class="border-2 border-dashed border-amber-500/30 rounded-xl p-10 text-center relative overflow-hidden group">
+                        <input type="file" id="amulet-upload" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
+                        <div id="upload-ui">
+                            <svg class="w-16 h-16 text-amber-500/50 mx-auto mb-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <button onclick="document.getElementById('amulet-upload').click()" class="btn-gold px-6 py-2 rounded-sm font-bold text-sm">เลือกรูปภาพพระเครื่อง</button>
+                            <p class="text-xs text-slate-500 mt-4">รองรับ JPG, PNG (แนะนำภาพที่ชัดเจนและมีแสงสว่างพอ)</p>
+                        </div>
+                        <div id="analysis-loading" class="hidden py-10">
+                            <div class="loading-spinner mx-auto mb-4"></div>
+                            <p class="text-amber-500 animate-pulse font-bold">✨ Gemini AI กำลังพิจารณาพุทธลักษณะ...</p>
+                        </div>
+                        <img id="image-preview" class="hidden mx-auto max-h-64 rounded-lg shadow-2xl mb-6">
+                    </div>
+                    <div id="analysis-result" class="mt-6 p-4 bg-slate-900 border border-amber-500/20 rounded hidden text-sm leading-relaxed text-slate-300">
+                        <!-- AI Result will be here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catalog -->
+    <section id="catalog" class="py-24">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-kanit font-bold text-center gold-text mb-16 uppercase tracking-widest">Premium Catalog</h2>
+            <div id="amulet-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-24 bg-slate-950 border-t border-amber-500/10">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-kanit font-bold text-white mb-4 uppercase tracking-widest">ช่องทางการติดต่อ</h2>
+                <p class="text-slate-400">เรายินดีให้บริการทุกท่านด้วยความซื่อตรงและเป็นกันเอง</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-10">
+                <!-- Contact Info Cards -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="premium-card p-6 rounded-xl flex items-start space-x-4">
+                        <div class="bg-amber-500/10 p-3 rounded-lg text-amber-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white mb-1">ที่ตั้งหน้าร้าน</h4>
+                            <p class="text-sm text-slate-400">ศูนย์พระเครื่องชั้นนำ, กรุงเทพมหานคร (เปิดทุกวัน 10:00 - 18:00)</p>
+                        </div>
+                    </div>
+
+                    <div class="premium-card p-6 rounded-xl flex items-start space-x-4">
+                        <div class="bg-amber-500/10 p-3 rounded-lg text-amber-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white mb-1">เบอร์โทรศัพท์</h4>
+                            <p class="text-sm text-slate-400">08x-xxx-xxxx</p>
+                        </div>
+                    </div>
+
+                    <div class="premium-card p-6 rounded-xl flex items-start space-x-4">
+                        <div class="bg-amber-500/10 p-3 rounded-lg text-amber-500">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white mb-1">Line ID</h4>
+                            <p class="text-sm text-slate-400">@richamulet (มี @ นำหน้า)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="lg:col-span-2 premium-card p-8 rounded-xl">
+                    <h4 class="text-xl font-kanit font-bold text-white mb-6">ส่งข้อความถึงเรา</h4>
+                    <form id="contact-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs text-slate-500 uppercase mb-2">ชื่อ-นามสกุล</label>
+                            <input type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-amber-500 outline-none text-white" placeholder="กรุณากรอกชื่อของคุณ">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 uppercase mb-2">เบอร์โทรติดต่อ</label>
+                            <input type="tel" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-amber-500 outline-none text-white" placeholder="0xx-xxx-xxxx">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs text-slate-500 uppercase mb-2">ข้อความ / พระเครื่องที่สนใจ</label>
+                            <textarea rows="4" class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-sm focus:border-amber-500 outline-none text-white" placeholder="ระบุรายละเอียดที่ต้องการสอบถาม"></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <button type="button" onclick="alert('ขอบคุณสำหรับข้อความ ทีมงานจะติดต่อกลับโดยเร็วที่สุดครับ')" class="btn-gold w-full py-4 rounded font-bold uppercase tracking-widest text-sm">ส่งข้อมูลการติดต่อ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Chat Window -->
+    <div id="chat-window">
+        <div class="p-4 bg-amber-600 flex justify-between items-center rounded-t-16">
+            <div class="flex items-center text-black font-bold font-kanit">
+                <span class="mr-2">✨</span> AI Expert Assistant
+            </div>
+            <button onclick="toggleChat()" class="text-black hover:text-white transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="chat-content" class="flex-1 overflow-y-auto p-4 space-y-4 text-sm scrollbar-thin scrollbar-thumb-amber-500">
+            <div class="chat-bubble-ai p-3 max-w-[85%]">สวัสดีครับ ผมคือผู้เชี่ยวชาญพระเครื่อง AI ยินดีให้คำปรึกษาเรื่องพุทธคุณ ประวัติ และการสะสมครับ ท่านมีอะไรให้ช่วยไหมครับ?</div>
+        </div>
+        <div class="p-4 border-t border-slate-800 flex gap-2">
+            <input type="text" id="chat-input" placeholder="พิมพ์ข้อความที่นี่..." class="flex-1 bg-slate-900 border border-slate-700 rounded-full px-4 py-2 outline-none focus:border-amber-500 text-white" onkeypress="if(event.key==='Enter') sendChatMessage()">
+            <button onclick="sendChatMessage()" class="bg-amber-500 text-black w-10 h-10 rounded-full flex items-center justify-center hover:bg-amber-400 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <button onclick="toggleChat()" class="fixed bottom-6 right-6 w-14 h-14 bg-amber-500 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition z-40 group">
+        <div class="absolute -top-12 right-0 bg-white text-black text-[10px] font-bold py-1 px-3 rounded-md opacity-0 group-hover:opacity-100 transition whitespace-nowrap shadow-xl">ถาม AI Expert</div>
+        <svg class="w-7 h-7 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+    </button>
+
+    <!-- Footer -->
+    <footer class="bg-black py-12 border-t border-white/5 text-center">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col items-center space-y-4">
+                <div class="w-8 h-8 opacity-50">
+                    <svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="none" stroke="#fbbf24" stroke-width="2" /></svg>
+                </div>
+                <p class="text-slate-600 text-[10px] uppercase tracking-[0.4em]">© 2024 Rich Amulet AI Edition - All Rights Reserved</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const apiKey = ""; // API Key used by system
+
+        // --- Core Gemini Functions ---
+        async function callGemini(payload, isImage = false) {
+            const model = 'gemini-2.5-flash-preview-09-2025';
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            
+            let retries = 0;
+            const maxRetries = 5;
+
+            while (retries < maxRetries) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) throw new Error('API Error');
+                    
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text;
+                } catch (err) {
+                    const delay = Math.pow(2, retries) * 1000;
+                    await new Promise(res => setTimeout(res, delay));
+                    retries++;
+                }
+            }
+            return "ขออภัยครับ ระบบไม่สามารถประมวลผลได้ในขณะนี้ กรุณาลองใหม่ภายหลัง";
+        }
+
+        // --- Feature 1: AI Vision Analyst ---
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Data = e.target.result.split(',')[1];
+                
+                // UI States
+                document.getElementById('upload-ui').classList.add('hidden');
+                document.getElementById('image-preview').src = e.target.result;
+                document.getElementById('image-preview').classList.remove('hidden');
+                document.getElementById('analysis-loading').classList.remove('hidden');
+                document.getElementById('analysis-result').classList.add('hidden');
+
+                const payload = {
+                    contents: [{
+                        parts: [
+                            { text: "คุณเป็นผู้เชี่ยวชาญพระเครื่องไทย วิเคราะห์รูปภาพนี้: ระบุชื่อพระ, วัด, รุ่น, และพุทธคุณเด่นๆ ของพระเครื่องในภาพนี้อย่างละเอียดและสุภาพ" },
+                            { inlineData: { mimeType: file.type, data: base64Data } }
+                        ]
+                    }]
+                };
+
+                const result = await callGemini(payload, true);
+                
+                document.getElementById('analysis-loading').classList.add('hidden');
+                const resultDiv = document.getElementById('analysis-result');
+                resultDiv.innerText = result;
+                resultDiv.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- Feature 2: AI Multimodal Chat ---
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const chatContent = document.getElementById('chat-content');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // User UI
+            chatContent.innerHTML += `<div class="chat-bubble-user p-3 max-w-[85%] ml-auto">${text}</div>`;
+            input.value = '';
+            chatContent.scrollTop = chatContent.scrollHeight;
+
+            // AI Loading UI
+            const loadingId = 'ai-loading-' + Date.now();
+            chatContent.innerHTML += `<div id="${loadingId}" class="chat-bubble-ai p-3 max-w-[85%] italic">✨ กำลังค้นหาข้อมูลพุทธคุณ...</div>`;
+            chatContent.scrollTop = chatContent.scrollHeight;
+
+            const payload = {
+                contents: [{ parts: [{ text: `คุณคือผู้เชี่ยวชาญพระเครื่องของ Rich Amulet: ${text}` }] }],
+                systemInstruction: { parts: [{ text: "ตอบคำถามเกี่ยวกับพระเครื่องไทย ประวัติ วัด พุทธศิลป์ และความเชื่อ อย่างสุภาพและน่าเลื่อมใส หากคำถามไม่เกี่ยวกับพระเครื่อง ให้แจ้งว่าคุณเชี่ยวชาญเฉพาะเรื่องพระเครื่องเท่านั้น" }] }
+            };
+
+            const response = await callGemini(payload);
+            document.getElementById(loadingId).remove();
+            chatContent.innerHTML += `<div class="chat-bubble-ai p-3 max-w-[85%]">${response}</div>`;
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        function toggleChat() {
+            const win = document.getElementById('chat-window');
+            win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        // --- Mock Data & UI Render ---
+        const amulets = [
+            { id: 1, name: "พระสมเด็จวัดระฆัง พิมพ์ใหญ่", price: "ติดต่อสอบถาม", category: "เบญจภาคี", image: "https://images.unsplash.com/photo-1605142859862-978be7eba909?q=80&w=400" },
+            { id: 2, name: "หลวงปู่ทวด รุ่นเลขใต้ฐาน ปี 05", price: "550,000", category: "หลวงปู่ทวด", image: "https://images.unsplash.com/photo-1590073844006-33379778ae09?q=80&w=400" },
+            { id: 3, name: "พระปิดตาหลวงปู่เอี่ยม", price: "ติดต่อสอบถาม", category: "พระปิดตา", image: "https://images.unsplash.com/photo-1569421134182-359670d8a9e2?q=80&w=400" }
+        ];
+
+        function renderAmulets() {
+            const list = document.getElementById('amulet-list');
+            list.innerHTML = amulets.map(item => `
+                <div class="premium-card rounded-xl overflow-hidden group">
+                    <div class="relative h-80 overflow-hidden">
+                        <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <span class="text-amber-500 text-[10px] font-bold uppercase tracking-widest">${item.category}</span>
+                            <h3 class="text-lg font-kanit font-bold text-white mt-1">${item.name}</h3>
+                        </div>
+                    </div>
+                    <div class="p-5 flex justify-between items-center bg-slate-900/50">
+                        <span class="text-amber-400 font-bold">฿ ${item.price}</span>
+                        <button class="text-xs text-white/50 hover:text-white transition">ดูพุทธคุณ ✨</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.onload = renderAmulets;
+    </script>
+</body>
+</html>
