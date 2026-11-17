@@ -1,0 +1,123 @@
+"""Ring E - men's jade cabochon ring, 4 bead-tip claws, bezel rim, pave shoulders ("design 4, classic luxury" photo).
+Stone, from IGA report TG2506120063: natural jadeite, oval cabochon 18.18 x 24.90 x 10.50 mm, 48.90 ct.
+Long axis along the finger (as in the photo: 18.18 across, 24.90 along the finger).
+Proportions measured from the photo, scaled by the stone width (18.18 mm = 430 px -> 23.6 px/mm):
+  bezel rim 0.85 thick, rim 1.8 high; claws 1.5 thick with 1.9 bead tips at the four corners;
+  shoulders as wide as the stone near the head (24.0), tapering to 6.0 under the finger;
+  pave panel on each shoulder, round 1.30 mm.
+Not in the photo or report (assumed, change here): inner dia 19.84 (US 10 / HK 22 / Thai 62),
+bottom thickness 2.20, metal under the stone 2.40."""
+import numpy as np, sys
+from scipy.interpolate import PchipInterpolator
+from manifold3d import CrossSection
+from common import *
+
+# ---------- numbers ----------
+SA, SB, SH = 18.18, 24.90, 10.50          # stone width (X), length (Y, along finger), height
+GIRDLE = 1.00                              # straight wall at the base of the cabochon
+CT, SG = 48.90, 3.33                       # report weight, jadeite specific gravity
+ID, T_BOT, W_BOT, UNDER = 19.84, 2.20, 6.00, 2.40
+RIM_T, RIM_H, CLR = 0.85, 1.80, 0.05
+PAVE = 1.80
+ri = ID / 2
+z0 = ri + UNDER                            # flat base of the stone
+a, b = SA / 2, SB / 2
+
+# ---------- cabochon: dome z = Hd * (1 - rho^2)^p, p fitted so the volume gives 48.90 ct ----------
+Hd = SH - GIRDLE
+area = np.pi * a * b
+want = CT * 0.2 / SG * 1000                # mm3
+p = area * Hd / (want - area * GIRDLE) - 1
+def cabochon():
+    rho = np.r_[np.linspace(0, 0.9, 30), 1 - np.geomspace(0.1, 1e-4, 40)]
+    prof = [(0, 0), (1, 0), (1, GIRDLE)] + [(r, GIRDLE + Hd * (1 - r * r) ** p) for r in rho[::-1]]
+    prof = [(x, y) for x, y in prof if not (x == 0 and y == GIRDLE + Hd and False)]
+    return Manifold.revolve(CrossSection([prof]), 160).scale([a, b, 1])
+def stone_z(x, y):
+    r2 = (x / a) ** 2 + (y / b) ** 2
+    return z0 + GIRDLE + Hd * max(0.0, 1 - r2) ** p if r2 <= 1 else z0
+stone = cabochon().translate([0, 0, z0])
+
+# ---------- shank: sweep, flat platform at the stone base ----------
+# shoulder outline in the front view: from the bezel foot (10.0, z0) sloping out to (13.8, 3.5), then into the band
+deg = [0, 39.0, 57.4, 75.8, 100, 130, 180]
+Rk = PchipInterpolator(deg, [17.0, 15.85, 14.84, 14.24, 13.2, 12.4, ri + T_BOT])
+Wk = PchipInterpolator(deg, [24.0, 24.0, 20.5, 15.5, 10.0, 7.2, W_BOT])
+def ang(t): return abs(np.degrees(np.arctan2(np.sin(t), np.cos(t))))
+CH = 0.7
+def section(t):
+    A = ang(t); R = float(Rk(A)); w = float(Wk(A)) / 2; wi = w - 0.35
+    return [(ri, -wi), (ri, wi), (R - CH, w), (R, w - CH), (R, -w + CH), (R - CH, -w)]
+shank = sweep([ring_loop(section(t), t) for t in np.linspace(0, 2 * np.pi, 721)[:-1]])
+shank = shank - Manifold.cube([80, 80, 40]).translate([-40, -40, z0])          # platform at z0
+
+# ---------- head: oval cup + bezel rim ----------
+def oval_prism(ra, rb, zlo, zhi, n=160):
+    return Manifold.cylinder(zhi - zlo, 1, 1, n).scale([ra, rb, 1]).translate([0, 0, zlo])
+head = oval_prism(a + CLR + RIM_T, b + CLR + RIM_T, z0 - 2.0, z0 + RIM_H)
+metal = shank + head
+metal = metal - oval_prism(a + CLR, b + CLR, z0, z0 + 20)                       # stone seat
+metal = metal - oval_prism(a - 1.8, b - 1.8, 4.0, z0 + 1)                       # light window, 1.8 ledge
+metal = metal - Manifold.cylinder(60, ri, ri, 256).rotate([90, 0, 0]).translate([0, 30, 0])  # finger hole
+
+# ---------- claws at the four corners ----------
+def ell(phi, off):
+    e = np.array([a * np.cos(phi), b * np.sin(phi)]); n = np.array([np.cos(phi) / a, np.sin(phi) / b])
+    n /= np.linalg.norm(n); return e + n * off
+def tube(pts, r0, r1):
+    rs = np.linspace(r0, r1, len(pts)); sph = [Manifold.sphere(r, 20).translate(q) for q, r in zip(pts, rs)]
+    return union([Manifold.batch_hull([u, v]) for u, v in zip(sph[:-1], sph[1:])])
+CLAW_PHI = [np.radians(d) for d in (52, 128, 232, 308)]
+claws = []
+for phi in CLAW_PHI:
+    path = []
+    # tip rests on the dome 4.6 mm above the stone base (holds well past the widest point)
+    off = 0.0
+    while stone_z(*ell(phi, off - 0.02)) < z0 + 4.1: off -= 0.02
+    tx, ty = ell(phi, off - 0.15); tz = z0 + 4.6
+    for off, dz in [(1.05, -1.0), (1.05, RIM_H), (0.75, 3.6)]:
+        x, y = ell(phi, off); path.append((x, y, z0 + dz))
+    path.append((tx, ty, tz))
+    claws.append(tube(path, 1.0, 0.9) + Manifold.sphere(1.25, 24).scale([1, 1, 0.8]).translate([tx, ty, tz]))
+metal = metal + union(claws)
+metal = metal - Manifold.cylinder(60, ri, ri, 256).rotate([90, 0, 0]).translate([0, 30, 0])
+
+# ---------- pave panels on both shoulders ----------
+stones = [stone]
+PITCH = PAVE + 0.25
+gem = brilliant(PAVE); gh = stone_height(PAVE)
+cut_list, gems, beads = [], [], []
+for side in (1, -1):
+    A = 46.3
+    while A <= 72.0:
+        R = float(Rk(A)); w = float(Wk(A)) / 2 - CH - 1.35
+        n = int(np.floor(2 * w / PITCH)) + 1
+        ys = (np.arange(n) - (n - 1) / 2) * PITCH
+        for y in ys:
+            t = side * A
+            gems.append(on_ring(gem, t, R - gh + 0.05, y))
+            cut_list.append(on_ring(seat(PAVE), t, R - gh + 0.05, y))
+        for y in (ys[:-1] + ys[1:]) / 2:
+            Ab = A + np.degrees(PITCH / 2 / R)
+            beads.append(on_ring(Manifold.sphere(0.40, 12), side * Ab, float(Rk(Ab)) - 0.12, y))
+        A += np.degrees(PITCH / R)
+metal = metal - union(cut_list)
+metal = metal + union(beads)
+stones += gems
+N_PAVE = len(gems)
+
+if __name__ == "__main__":
+    out = sys.argv[1] if len(sys.argv) > 1 else "out"
+    tm, _ = export("ring-E-jade-cabochon", metal, stones, out)
+    # drop zero-area slivers left by the boolean ops so the STL checks as one watertight body
+    import trimesh
+    for part in ("metal", "full", "stones"):
+        f = f"{out}/ring-E-jade-cabochon-{part}.stl"; m = trimesh.load(f)
+        m.update_faces(m.nondegenerate_faces()); m.remove_unreferenced_vertices(); m.merge_vertices(); m.fill_holes()
+        bodies = [q for q in m.split(only_watertight=False) if q.area > 1e-3]
+        m = trimesh.util.concatenate(bodies); m.export(f)
+        if part == "metal": tm = m
+    sv = stone.volume()
+    print(f"dome exponent p={p:.3f}; stone vol {sv:.0f} mm3 -> {sv*SG/1000/0.2:.2f} ct (report {CT})")
+    print("pave stones", N_PAVE, "metal vol", round(tm.volume, 1), "watertight", tm.is_watertight,
+          "silver925 g", round(tm.volume * 10.36 / 1000, 2), "bbox", np.round(tm.bounds, 2).tolist())

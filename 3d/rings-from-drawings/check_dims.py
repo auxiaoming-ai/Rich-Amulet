@@ -35,3 +35,14 @@ for l, w, g, d in rows: print(f"{l:38s} {w:8.2f} {g:8.2f} {d:+7.2f}")
 print()
 for n, m, w in (("A", A, 3.802), ("B", B, 2.561), ("C", C, 2.628), ("D", D, 2.557)):
     print(f"ring {n}: watertight={m.is_watertight}  metal {m.volume:6.1f} mm3 -> silver 925 {m.volume*RHO925/1000:5.3f} g  (drawing {w:5.3f} g, {100*(m.volume*RHO925/1000/w-1):+5.1f}%)")
+
+# E: built from the photo + IGA stone report (no drawing) - check the stone and the fixed numbers
+E = trimesh.load("stl/ring-E-jade-cabochon-metal.stl"); Es = trimesh.load("stl/ring-E-jade-cabochon-stones.stl")
+jade = max(Es.split(only_watertight=False), key=lambda s: s.volume); dn = thickness_along(E, [0, 0, -1])
+print()
+for l, g, w in (("E jade width (X)", np.ptp(jade.vertices[:, 0]), 18.18), ("E jade length (Y)", np.ptp(jade.vertices[:, 1]), 24.90),
+                ("E jade height", np.ptp(jade.vertices[:, 2]), 10.50), ("E jade carat @ SG 3.33", jade.volume * 3.33 / 200, 48.90),
+                ("E inner diameter", 2 * inner_radius(E), 19.84), ("E bottom thickness", dn[1] - dn[0], 2.20),
+                ("E bottom width (above 0.7 chamfer)", width_at(E, E.bounds[0, 2] + 0.7, 0.05), 6.00)):
+    print(f"{l:38s} {w:8.2f} {g:8.2f} {g - w:+7.2f}")
+print(f"ring E: watertight={E.is_watertight}  metal {E.volume:6.1f} mm3 -> silver 925 {E.volume*RHO925/1000:5.2f} g")

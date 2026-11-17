@@ -33,3 +33,12 @@ Each ring has these files in `stl/`:
 | D | 3.412 g | 2.557 g | +33 % |
 
 Ring D matches every printed dimension but is heavier than the drawing's weight table. The original probably has hollowing or thinner sections that the drawing views do not show.
+
+## Ring E - jade cabochon (from the "design 4" photo + IGA report TG2506120063)
+- Stone (exact, from the report): natural jadeite oval cabochon 18.18 x 24.90 x 10.50 mm, 48.90 ct.
+  The dome shape is fitted so the model's volume at SG 3.33 gives 48.87 ct.
+- Measured from the photo (scale = stone width 18.18 mm): bezel rim 0.85 x 1.80 high, 4 bead-tip claws at the corners,
+  shoulders 24.0 mm wide at the head tapering to 6.00 under the finger, pave 1.80 mm x 34 per side (68 total).
+- Assumed (not in photo/report): inner dia 19.84 (US 10), bottom thickness 2.20, metal under stone 2.40.
+- Metal 3081 mm3 -> silver 925 31.9 g (solid shoulders; can be hollowed if a lighter ring is wanted).
+- Files: stl/ring-E-jade-cabochon-{metal,stones,full,spec}.stl, .3mf, -spec.3mf, previews.
