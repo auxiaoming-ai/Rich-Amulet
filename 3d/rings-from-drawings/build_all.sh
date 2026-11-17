@@ -7,3 +7,4 @@ python3 check_dims.py
 for n in ring-A-pave-band ring-B-twist ring-C-oval-solitaire ring-D-signet; do
   python3 render.py "$OUT/$n-metal.stl" "$OUT/$n-preview.png" "$OUT/$n-stones.stl"
 done
+python3 annotate.py
