@@ -90,6 +90,21 @@ for t in (52, 128, 232, 308):
 metal = Manifold.batch_boolean([band, rail] + prongs + pave, __import__('manifold3d').OpType.Add)
 ring = metal + stone
 
+import trimesh
+def tm_of(m):
+    mm = m.to_mesh()
+    return trimesh.Trimesh(np.asarray(mm.vert_properties)[:, :3], np.asarray(mm.tri_verts), process=True)
+if "--parts" in sys.argv:
+    d = sys.argv[sys.argv.index("--parts") + 1]
+    metal_tm, stone_tm, full_tm = tm_of(metal), tm_of(stone), tm_of(ring)
+    full_tm.export(f"{d}/ring-full.stl")
+    metal_tm.export(f"{d}/ring-metal.stl"); stone_tm.export(f"{d}/ring-center-stone.stl")
+    sc = trimesh.Scene(); sc.add_geometry(metal_tm, node_name="metal", geom_name="metal"); sc.add_geometry(stone_tm, node_name="stone", geom_name="stone")
+    sc.export(f"{d}/ring-3d.3mf"); sc.export(f"{d}/ring-3d.obj")
+    for n, t in [("metal", metal_tm), ("stone", stone_tm), ("full", full_tm)]:
+        print(n, "watertight", t.is_watertight, "vol", round(t.volume, 1))
+    sys.exit()
+
 mesh = ring.to_mesh()
 v = np.asarray(mesh.vert_properties)[:, :3]
 f = np.asarray(mesh.tri_verts)
