@@ -1,13 +1,15 @@
 """Ring E - men's jade cabochon ring, 4 bead-tip claws, bezel rim, pave shoulders ("design 4, classic luxury" photo).
 Stone, from IGA report TG2506120063: natural jadeite, oval cabochon 18.18 x 24.90 x 10.50 mm, 48.90 ct.
 Long axis along the finger (as in the photo: 18.18 across, 24.90 along the finger).
-Proportions measured from the photo, scaled by the stone width (18.18 mm = 430 px -> 23.6 px/mm):
-  bezel rim 0.85 thick, rim 1.8 high; claws 1.5 thick with 1.9 bead tips at the four corners;
-  shoulders as wide as the stone near the head (24.0), tapering to 6.0 under the finger;
-  pave panel on each shoulder, round 1.30 mm.
+Proportions from the photo (scale = stone width 18.18 mm), checked against casting/CAD production
+standards (bezel wall 0.45-0.7, prong >= 0.45, metal >= 1.2 under stone settings, open gaps >= 0.4):
+  bezel wall 0.70, 1.60 high; 4 claws 1.30 thick, tips 1.60, holding the dome 3.4 mm above the base;
+  shoulders flush with the bezel (ring 23 mm wide, not wider than the head), 22.0 long at the head,
+  tapering to 5.50 under the finger; pave on the sloping shoulder faces, round 1.50 mm, 0.15 gaps;
+  shoulders hollowed from inside (1.30 walls) and an open gallery under the stone, so the weight is realistic.
 Ring size from the customer: Thai 58 = inner circumference 58 mm -> inner dia 58/pi = 18.46 (about US 8 1/4).
 Assumed (not in photo/report):
-bottom thickness 2.20, metal under the stone 2.40."""
+bottom thickness 2.00, metal under the stone 2.00."""
 import numpy as np, sys
 from scipy.interpolate import PchipInterpolator
 from manifold3d import CrossSection
@@ -18,9 +20,9 @@ SA, SB, SH = 18.18, 24.90, 10.50          # stone width (X), length (Y, along fi
 GIRDLE = 1.00                              # straight wall at the base of the cabochon
 CT, SG = 48.90, 3.33                       # report weight, jadeite specific gravity
 SIZE_TH = 58
-ID, T_BOT, W_BOT, UNDER = SIZE_TH / np.pi, 2.20, 6.00, 2.40
-RIM_T, RIM_H, CLR = 0.85, 1.80, 0.05
-PAVE = 1.80
+ID, T_BOT, W_BOT, UNDER = SIZE_TH / np.pi, 2.00, 5.50, 2.00
+RIM_T, RIM_H, CLR = 0.70, 1.60, 0.05
+PAVE, WALL = 1.70, 1.30
 ri = ID / 2
 z0 = ri + UNDER                            # flat base of the stone
 a, b = SA / 2, SB / 2
@@ -41,16 +43,17 @@ def stone_z(x, y):
 stone = cabochon().translate([0, 0, z0])
 
 # ---------- shank: sweep, flat platform at the stone base ----------
-# shoulder outline in the front view: from the bezel foot (10.0, z0) sloping out to (13.8, 3.5), then into the band
-# outline points (x, z) relative to the stone base -> (angle, radius) so it follows any ring size
-SH_PTS = [(10.0, z0), (12.5, z0 - 4.32), (13.8, z0 - 8.82)]
+# shoulder outline in the front view, flush with the bezel foot (x = a + rim), easing into the band.
+# points (x, z) relative to the stone base -> (angle, radius) so it follows any ring size
+XH = a + CLR + RIM_T
+SH_PTS = [(XH, z0), (XH + 1.40, z0 - 4.6), (XH + 1.70, z0 - 9.0)]
 sh_deg = [float(np.degrees(np.arctan2(x, z))) for x, z in SH_PTS]
 sh_R = [float(np.hypot(x, z)) for x, z in SH_PTS]
 deg = [0] + sh_deg + [100, 130, 180]
-Rk = PchipInterpolator(deg, [sh_R[0] + 1.15] + sh_R + [ri + 3.28, ri + 2.48, ri + T_BOT])
-Wk = PchipInterpolator(deg, [24.0, 24.0, 20.5, 15.5, 10.0, 7.2, W_BOT])
+Rk = PchipInterpolator(deg, [sh_R[0] + 1.15] + sh_R + [ri + 2.50, ri + 2.15, ri + T_BOT])
+Wk = PchipInterpolator(deg, [22.0, 22.0, 18.0, 12.5, 8.5, 6.4, W_BOT])
 def ang(t): return abs(np.degrees(np.arctan2(np.sin(t), np.cos(t))))
-CH = 0.7
+CH = 0.6
 def section(t):
     A = ang(t); R = float(Rk(A)); w = float(Wk(A)) / 2; wi = w - 0.35
     return [(ri - 0.1, -wi), (ri - 0.1, wi), (R - CH, w), (R, w - CH), (R, -w + CH), (R - CH, -w)]
@@ -63,8 +66,22 @@ def oval_prism(ra, rb, zlo, zhi, n=160):
 head = oval_prism(a + CLR + RIM_T, b + CLR + RIM_T, z0 - 2.0, z0 + RIM_H)
 metal = shank + head
 metal = metal - oval_prism(a + CLR, b + CLR, z0, z0 + 20)                       # stone seat
-metal = metal - oval_prism(a - 1.8, b - 1.8, 4.0, z0 + 1)                       # light window, 1.8 ledge
+metal = metal - oval_prism(a - 1.4, b - 1.4, 4.0, z0 + 1)                       # open gallery, 1.4 ledge
 metal = metal - Manifold.cylinder(60, ri, ri, 256).rotate([90, 0, 0]).translate([0, 30, 0])  # finger hole
+
+# ---------- back-cut: hollow the shoulders from the finger side, leaving WALL all round ----------
+def pocket(side):
+    loops = []
+    for A in np.linspace(26.3, 117.7, 91):
+        e = min(1.0, (A - 26.3) / 8, (117.7 - A) / 12)                # ease the pocket in and out
+        R = float(Rk(A)); w = float(Wk(A)) / 2
+        ro = ri + (R - WALL - ri) * e if e > 0 else ri - 0.2
+        wy = max(0.3, (w - WALL) * min(1, e * 1.5))
+        ro = max(ro, ri - 0.2)
+        sec = [(ri - 1.0, -wy), (ri - 1.0, wy), (ro, wy), (ro, -wy)]
+        loops.append(ring_loop(sec, side * np.radians(A))[::side])
+    return sweep(loops, closed=False)
+metal = metal - pocket(1) - pocket(-1)
 
 # ---------- claws at the four corners ----------
 def ell(phi, off):
@@ -77,26 +94,26 @@ CLAW_PHI = [np.radians(d) for d in (52, 128, 232, 308)]
 claws = []
 for phi in CLAW_PHI:
     path = []
-    # tip rests on the dome 4.6 mm above the stone base (holds well past the widest point)
-    off = 0.0
-    while stone_z(*ell(phi, off - 0.02)) < z0 + 4.1: off -= 0.02
-    tx, ty = ell(phi, off - 0.15); tz = z0 + 4.6
-    for off, dz in [(1.05, -1.0), (1.05, RIM_H), (0.75, 3.6)]:
-        x, y = ell(phi, off); path.append((x, y, z0 + dz))
+    # tip presses on the dome 3.4 mm above the stone base, just past the steep flank
+    TZ = z0 + 3.4; off = 0.0
+    while stone_z(*ell(phi, off - 0.02)) < TZ: off -= 0.02
+    tx, ty = ell(phi, off + 0.45); tz = TZ + 0.15
+    for off_, dz in [(0.70 + CLR, -0.8), (0.75 + CLR, RIM_H)]:
+        x, y = ell(phi, off_); path.append((x, y, z0 + dz))
     path.append((tx, ty, tz))
-    claws.append(tube(path, 1.0, 0.9) + Manifold.sphere(1.25, 24).scale([1, 1, 0.8]).translate([tx, ty, tz]))
+    claws.append(tube(path, 0.65, 0.65) + Manifold.sphere(0.80, 24).scale([1, 1, 0.85]).translate([tx, ty, tz]))
 metal = metal + union(claws)
 metal = metal - Manifold.cylinder(60, ri, ri, 256).rotate([90, 0, 0]).translate([0, 30, 0])
 
 # ---------- pave panels on both shoulders ----------
 stones = [stone]
-PITCH = PAVE + 0.25
+PITCH = PAVE + 0.15
 gem = brilliant(PAVE); gh = stone_height(PAVE)
 cut_list, gems, beads = [], [], []
 for side in (1, -1):
-    A = sh_deg[0] + 7.3
-    while A <= sh_deg[2] - 3.8:
-        R = float(Rk(A)); w = float(Wk(A)) / 2 - CH - 1.35
+    A = sh_deg[0] + 5.5
+    while A <= sh_deg[2] - 4.0:
+        R = float(Rk(A)); w = float(Wk(A)) / 2 - CH - 1.40
         n = int(np.floor(2 * w / PITCH)) + 1
         ys = (np.arange(n) - (n - 1) / 2) * PITCH
         for y in ys:
@@ -105,7 +122,7 @@ for side in (1, -1):
             cut_list.append(on_ring(seat(PAVE), t, R - gh + 0.05, y))
         for y in (ys[:-1] + ys[1:]) / 2:
             Ab = A + np.degrees(PITCH / 2 / R)
-            beads.append(on_ring(Manifold.sphere(0.40, 12), side * Ab, float(Rk(Ab)) - 0.12, y))
+            beads.append(on_ring(Manifold.sphere(0.35, 12), side * Ab, float(Rk(Ab)) - 0.10, y))
         A += np.degrees(PITCH / R)
 metal = metal - union(cut_list)
 metal = metal + union(beads)
@@ -114,6 +131,7 @@ N_PAVE = len(gems)
 
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "out"
+    metal = metal.simplify(0.002); stones = [s_.simplify(0.002) for s_ in stones]
     tm, _ = export("ring-E-jade-cabochon", metal, stones, out)
     # drop zero-area slivers left by the boolean ops so the STL checks as one watertight body
     import trimesh

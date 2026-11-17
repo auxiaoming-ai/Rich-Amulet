@@ -8,3 +8,4 @@ for n in ring-A-pave-band ring-B-twist ring-C-oval-solitaire ring-D-signet ring-
   python3 render.py "$OUT/$n-metal.stl" "$OUT/$n-preview.png" "$OUT/$n-stones.stl"
 done
 python3 annotate.py
+python3 export_3dm.py

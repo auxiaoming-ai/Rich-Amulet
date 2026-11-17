@@ -37,9 +37,14 @@ Ring D matches every printed dimension but is heavier than the drawing's weight 
 ## Ring E - jade cabochon (from the "design 4" photo + IGA report TG2506120063)
 - Stone (exact, from the report): natural jadeite oval cabochon 18.18 x 24.90 x 10.50 mm, 48.90 ct.
   The dome shape is fitted so the model's volume at SG 3.33 gives 48.87 ct.
-- Measured from the photo (scale = stone width 18.18 mm): bezel rim 0.85 x 1.80 high, 4 bead-tip claws at the corners,
-  shoulders 24.0 mm wide at the head tapering to 6.00 under the finger, pave 1.80 mm x 34 per side (68 total).
 - Ring size Thai 58 (customer) = inner circumference 58 mm -> inner dia 18.46 (US 8 1/4).
-- Assumed (not in photo/report): bottom thickness 2.20, metal under stone 2.40.
-- Metal 3055 mm3 -> silver 925 31.65 g (solid shoulders; can be hollowed if a lighter ring is wanted).
-- Files: stl/ring-E-jade-cabochon-{metal,stones,full,spec}.stl, .3mf, -spec.3mf, previews.
+- Built to casting/CAD production minimums (bezel wall 0.45-0.7, prongs >= 0.45, >= 1.2 metal at settings,
+  openings >= 0.4): bezel 0.70 x 1.60 high, 4 claws 1.30 with 1.60 tips, shoulders flush with the bezel
+  (ring 23.5 mm wide), 22.0 long at the head, band bottom 5.50 x 2.00, hollow back with 1.30 walls,
+  open gallery with 1.40 ledge, pave 1.70 mm (2 fen) x 33 per side.
+- Metal 1148 mm3 -> silver 925 11.9 g, gold 18K ~16.7 g (comparable shop listings: ~10.5 g silver for a 17 x 23 mm top).
+
+## Rhino 8
+`export_3dm.py` writes stl/<ring>.3dm (Rhino 8 format, millimetres) with layers Metal / Jade / Diamonds (Stones) /
+Dimensions and the spec as Attribute User Text on the metal object. Geometry is mesh; in Rhino use
+QuadRemesh -> ToSubD -> ToNURBS (or MeshToNURB) if editable surfaces are needed.
