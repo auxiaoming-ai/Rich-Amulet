@@ -109,8 +109,9 @@ if __name__ == "__main__":
         ("", 1)] + weight_lines([4.526, 3.580, 3.197, 2.736, 5.115, 2.557, 2.685, 2.148, 2.028, 1.662])
         + [("This model, silver 925 = 3.412 g (solid)", 0.95)], m.bounds)
     # ---------- E (from photo + IGA stone report; weights computed from this model) ----------
-    n = "ring-E-jade-cabochon"; m = L(n); ri = 19.84 / 2; z0 = ri + 2.40; ztop = z0 + 10.50
-    vol = trimesh.load(f"stl/{n}-metal.stl").volume; g925 = vol * 10.36 / 1000
+    n = "ring-E-jade-cabochon"; m = L(n); ri = 58 / np.pi / 2; z0 = ri + 2.40; ztop = z0 + 10.50
+    vol = trimesh.load(f"stl/{n}-metal.stl").volume
+    NP = len(trimesh.load(f"stl/{n}-stones.stl").split(only_watertight=False)) - 1; g925 = vol * 10.36 / 1000
     # metal-to-silver-925 ratios used by the weight tables on the drawings (rings A-D)
     k = [1.770, 1.400, 1.250, 1.070, 2.000, 1.000, 1.050, 0.840, 0.793, 0.650]
     build(n, m, [
@@ -119,14 +120,14 @@ if __name__ == "__main__":
         lambda y: dim((-9.09, ztop + 2.2), (9.09, ztop + 2.2), "18.18", y, size=1.2, side=(-1.8, 0.9),
                       ext=[((-9.09, z0 + 1.0), (-9.09, ztop + 2.6)), ((9.09, z0 + 1.0), (9.09, ztop + 2.6))]),
         lambda y: dim((-1.2, -ri), (-1.2, -ri - 2.20), "2.20", y, side=(-1.0, -2.6)),
-        lambda y: dim((-ri, 0), (ri, 0), "ID 19.84 (US 10)", y, size=1.0, side=(-5.6, 0.8)),
+        lambda y: dim((-ri, 0), (ri, 0), "ID 18.46 (Thai 58)", y, size=1.0, side=(-5.6, 0.8)),
     ], [("RING E - jade cabochon, 4 claws, pave shoulders", 1.25),
         ("Jadeite oval cabochon 24.90 x 18.18 x 10.50 mm", 1), ("48.90 ct, IGA report TG2506120063", 1),
         ("Long axis along the finger", 1), ("Bezel rim 0.85 mm, 1.80 mm high, 4 claws", 1),
-        ("Stone top to finger hole 12.90 mm", 1), ("Head 26.70 x 19.98 mm, ring width 28.0 mm", 1),
+        (f"Stone top to finger hole {ztop - ri:.2f} mm", 1), (f"Head 26.70 x 19.98 mm, ring width {m.extents[0]:.1f} mm", 1),
         ("Shoulder width 24.0 mm, bottom 6.00 x 2.20 mm", 1),
-        ("Inner dia 19.84 mm (assumed US 10, change to size)", 1),
-        ("Round 1.80 mm x 68 (sieve 2.5 fen), 34 per side", 1), ("", 1),
+        ("Ring size Thai 58 = inner dia 18.46 mm (US 8 1/4)", 1),
+        (f"Round 1.80 mm x {NP} (sieve 2.5 fen), {NP // 2} per side", 1), ("", 1),
         ("Weight (g) of this model", 1.0)] + [(f"  {mt}  {g925 * r:.2f}", 0.95) for mt, r in zip(METALS, k)]
         + [(f"Metal volume {vol:.0f} mm3, stone not included", 0.95)], m.bounds)
     print("done")

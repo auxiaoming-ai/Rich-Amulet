@@ -5,7 +5,8 @@ Proportions measured from the photo, scaled by the stone width (18.18 mm = 430 p
   bezel rim 0.85 thick, rim 1.8 high; claws 1.5 thick with 1.9 bead tips at the four corners;
   shoulders as wide as the stone near the head (24.0), tapering to 6.0 under the finger;
   pave panel on each shoulder, round 1.30 mm.
-Not in the photo or report (assumed, change here): inner dia 19.84 (US 10 / HK 22 / Thai 62),
+Ring size from the customer: Thai 58 = inner circumference 58 mm -> inner dia 58/pi = 18.46 (about US 8 1/4).
+Assumed (not in photo/report):
 bottom thickness 2.20, metal under the stone 2.40."""
 import numpy as np, sys
 from scipy.interpolate import PchipInterpolator
@@ -16,7 +17,8 @@ from common import *
 SA, SB, SH = 18.18, 24.90, 10.50          # stone width (X), length (Y, along finger), height
 GIRDLE = 1.00                              # straight wall at the base of the cabochon
 CT, SG = 48.90, 3.33                       # report weight, jadeite specific gravity
-ID, T_BOT, W_BOT, UNDER = 19.84, 2.20, 6.00, 2.40
+SIZE_TH = 58
+ID, T_BOT, W_BOT, UNDER = SIZE_TH / np.pi, 2.20, 6.00, 2.40
 RIM_T, RIM_H, CLR = 0.85, 1.80, 0.05
 PAVE = 1.80
 ri = ID / 2
@@ -40,14 +42,18 @@ stone = cabochon().translate([0, 0, z0])
 
 # ---------- shank: sweep, flat platform at the stone base ----------
 # shoulder outline in the front view: from the bezel foot (10.0, z0) sloping out to (13.8, 3.5), then into the band
-deg = [0, 39.0, 57.4, 75.8, 100, 130, 180]
-Rk = PchipInterpolator(deg, [17.0, 15.85, 14.84, 14.24, 13.2, 12.4, ri + T_BOT])
+# outline points (x, z) relative to the stone base -> (angle, radius) so it follows any ring size
+SH_PTS = [(10.0, z0), (12.5, z0 - 4.32), (13.8, z0 - 8.82)]
+sh_deg = [float(np.degrees(np.arctan2(x, z))) for x, z in SH_PTS]
+sh_R = [float(np.hypot(x, z)) for x, z in SH_PTS]
+deg = [0] + sh_deg + [100, 130, 180]
+Rk = PchipInterpolator(deg, [sh_R[0] + 1.15] + sh_R + [ri + 3.28, ri + 2.48, ri + T_BOT])
 Wk = PchipInterpolator(deg, [24.0, 24.0, 20.5, 15.5, 10.0, 7.2, W_BOT])
 def ang(t): return abs(np.degrees(np.arctan2(np.sin(t), np.cos(t))))
 CH = 0.7
 def section(t):
     A = ang(t); R = float(Rk(A)); w = float(Wk(A)) / 2; wi = w - 0.35
-    return [(ri, -wi), (ri, wi), (R - CH, w), (R, w - CH), (R, -w + CH), (R - CH, -w)]
+    return [(ri - 0.1, -wi), (ri - 0.1, wi), (R - CH, w), (R, w - CH), (R, -w + CH), (R - CH, -w)]
 shank = sweep([ring_loop(section(t), t) for t in np.linspace(0, 2 * np.pi, 721)[:-1]])
 shank = shank - Manifold.cube([80, 80, 40]).translate([-40, -40, z0])          # platform at z0
 
@@ -88,8 +94,8 @@ PITCH = PAVE + 0.25
 gem = brilliant(PAVE); gh = stone_height(PAVE)
 cut_list, gems, beads = [], [], []
 for side in (1, -1):
-    A = 46.3
-    while A <= 72.0:
+    A = sh_deg[0] + 7.3
+    while A <= sh_deg[2] - 3.8:
         R = float(Rk(A)); w = float(Wk(A)) / 2 - CH - 1.35
         n = int(np.floor(2 * w / PITCH)) + 1
         ys = (np.arange(n) - (n - 1) / 2) * PITCH

@@ -39,6 +39,7 @@ Ring D matches every printed dimension but is heavier than the drawing's weight 
   The dome shape is fitted so the model's volume at SG 3.33 gives 48.87 ct.
 - Measured from the photo (scale = stone width 18.18 mm): bezel rim 0.85 x 1.80 high, 4 bead-tip claws at the corners,
   shoulders 24.0 mm wide at the head tapering to 6.00 under the finger, pave 1.80 mm x 34 per side (68 total).
-- Assumed (not in photo/report): inner dia 19.84 (US 10), bottom thickness 2.20, metal under stone 2.40.
-- Metal 3081 mm3 -> silver 925 31.9 g (solid shoulders; can be hollowed if a lighter ring is wanted).
+- Ring size Thai 58 (customer) = inner circumference 58 mm -> inner dia 18.46 (US 8 1/4).
+- Assumed (not in photo/report): bottom thickness 2.20, metal under stone 2.40.
+- Metal 3055 mm3 -> silver 925 31.65 g (solid shoulders; can be hollowed if a lighter ring is wanted).
 - Files: stl/ring-E-jade-cabochon-{metal,stones,full,spec}.stl, .3mf, -spec.3mf, previews.

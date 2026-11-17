@@ -42,7 +42,7 @@ jade = max(Es.split(only_watertight=False), key=lambda s: s.volume); dn = thickn
 print()
 for l, g, w in (("E jade width (X)", np.ptp(jade.vertices[:, 0]), 18.18), ("E jade length (Y)", np.ptp(jade.vertices[:, 1]), 24.90),
                 ("E jade height", np.ptp(jade.vertices[:, 2]), 10.50), ("E jade carat @ SG 3.33", jade.volume * 3.33 / 200, 48.90),
-                ("E inner diameter", 2 * inner_radius(E), 19.84), ("E bottom thickness", dn[1] - dn[0], 2.20),
+                ("E inner diameter", 2 * inner_radius(E), 58 / np.pi), ("E bottom thickness", dn[1] - dn[0], 2.20),
                 ("E bottom width (above 0.7 chamfer)", width_at(E, E.bounds[0, 2] + 0.7, 0.05), 6.00)):
     print(f"{l:38s} {w:8.2f} {g:8.2f} {g - w:+7.2f}")
 print(f"ring E: watertight={E.is_watertight}  metal {E.volume:6.1f} mm3 -> silver 925 {E.volume*RHO925/1000:5.2f} g")
